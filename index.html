@@ -2,154 +2,188 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>小牛生日快乐</title>
     <style>
-        /* 页面背景（生日氛围） */
         body {
             margin: 0;
             padding: 0;
             background: linear-gradient(120deg, #fff3e0, #ffe0b2);
             min-height: 100vh;
+            overflow: hidden;
         }
 
-        /* 生日弹窗样式 */
+        /* 弹窗样式（极致紧凑，适配叠加不消失） */
         .birthday-popup {
             position: fixed;
-            padding: 20px 28px;
-            border-radius: 16px;
+            padding: 8px 12px;
+            border-radius: 10px;
             font-family: "微软雅黑", "PingFang SC", sans-serif;
-            font-size: 19px;
-            color: #6d4c41; /* 暖棕文字 */
-            box-shadow: 0 6px 20px rgba(255, 111, 0, 0.25);
+            font-size: 12px;
+            color: #6d4c41;
+            box-shadow: 0 2px 8px rgba(255, 111, 0, 0.2);
             z-index: 9999;
             opacity: 0;
-            transition: 
-                opacity 0.6s ease, 
-                transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            transform: translate(-50%, -50%) scale(0.7);
-            cursor: pointer; /* 点击弹窗可关闭 */
+            transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: scale(0.6);
+            background-color: rgba(255, 255, 255, 0.85); /* 半透明+高对比度，叠加清晰 */
+            pointer-events: none; /* 取消点击事件，不影响叠加视觉 */
         }
 
-        /* 弹窗显示动画 */
         .birthday-popup.show {
             opacity: 1;
-            transform: translate(0, 0) scale(1);
+            transform: scale(1);
         }
 
-        /* 生日装饰（蛋糕+星星） */
+        /* 极简装饰，不干扰叠加 */
         .birthday-popup::before {
             content: "🎂";
             position: absolute;
-            top: -12px;
-            left: -12px;
-            font-size: 28px;
+            top: -4px;
+            left: -4px;
+            font-size: 14px;
         }
         .birthday-popup::after {
             content: "✨";
             position: absolute;
-            bottom: -8px;
-            right: -8px;
-            font-size: 22px;
+            bottom: -3px;
+            right: -3px;
+            font-size: 12px;
         }
 
-        /* 可选：页面标题样式 */
         .page-title {
             text-align: center;
-            margin-top: 50px;
-            font-size: 32px;
+            margin-top: 15px;
+            font-size: 20px;
             color: #e64a19;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
+            z-index: 9998;
+            position: relative;
+        }
+
+        /* 音乐按钮（最小化，不干扰叠加） */
+        .music-btn {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #e64a19;
+            color: white;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(230, 74, 25, 0.4);
+            z-index: 9998;
+            touch-action: manipulation;
         }
     </style>
 </head>
 <body>
-    <!-- 页面标题（可选） -->
     <h1 class="page-title">小牛生日快乐！🎉</h1>
+    <audio id="birthdayMusic" loop preload="auto">
+        <source src="https://cdn.freesound.org/previews/509/509910_10226570-lq.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放，请升级浏览器~
+    </audio>
+    <button class="music-btn" id="musicControl">▶️</button>
 
     <script>
-        // 生日祝福语库
+        // 音乐控制逻辑
+        const music = document.getElementById("birthdayMusic");
+        const musicBtn = document.getElementById("musicControl");
+        let isPlaying = false;
+
+        window.addEventListener("load", () => {
+            music.play().then(() => {
+                isPlaying = true;
+                musicBtn.textContent = "⏸️";
+            }).catch(() => musicBtn.textContent = "▶️");
+        });
+
+        musicBtn.addEventListener("click", () => {
+            isPlaying ? music.pause() : music.play();
+            musicBtn.textContent = isPlaying ? "▶️" : "⏸️";
+            isPlaying = !isPlaying;
+        });
+
+        // 35条精简祝福（叠加不杂乱）
         const birthdayWishes = [
-            "小牛生日快乐！今天你是最亮的星~",
-            "愿新的一岁，三餐四季都温柔🥰",
-            "蛋糕吃够，快乐管够，好运全有！",
-            "又长大一岁啦~解锁更多美好吧！",
-            "吹灭蜡烛，所有愿望都实现🎂",
-            "一岁一礼，一生欢喜，万事胜意~",
-            "今天的你，甜度直接拉满！",
-            "新岁无忧，所遇皆甜✨",
-            "生日快乐！把所有不开心都留在昨天~",
-            "愿生活像蛋糕一样，层层都甜蜜~"
+            "小牛生日快乐！",
+            "新岁暴富暴美！",
+            "好运爆棚🥰",
+            "快乐管够！",
+            "愿望全实现🎂",
+            "万事胜意！",
+            "甜度拉满！",
+            "所遇皆甜✨",
+            "烦恼清零！",
+            "生活甜蜜！",
+            "收获惊喜！",
+            "温柔以待！",
+            "健康快乐！",
+            "前路坦荡！",
+            "日子精彩！",
+            "眼里有光！",
+            "平安喜乐！",
+            "美好如约！",
+            "好运天天！",
+            "童心未泯！",
+            "笑口常开！",
+            "事事顺心！",
+            "惊喜不断！",
+            "钱包鼓鼓！",
+            "闪闪发光！",
+            "保持热爱！",
+            "财运滚滚！",
+            "生日超快乐！",
+            "奔赴山海！",
+            "永远精彩！",
+            "被爱包围！",
+            "一岁一礼！",
+            "一生欢喜！",
+            "快乐翻倍！",
+            "未来可期！"
         ];
 
-        // 生日主题配色
         const birthdayColors = [
-            "#ffe0b2", "#ffccbc", "#f8bbd0", 
-            "#e1bee7", "#d1c4e9", "#c8e6c9"
+            "#ffe0b2", "#ffccbc", "#f8bbd0", "#e1bee7", "#d1c4e9",
+            "#c8e6c9", "#b2ebf2", "#fff9c4", "#ffebee", "#f3e5f5",
+            "#e8f5e9", "#fff3e0", "#fce4ec", "#f1f8e9", "#fafafa"
         ];
 
-        const MAX_POPUPS = 7; // 最多同时显示7个弹窗
-        let currentPopupCount = 0;
-
-
-        /** 创建单个生日弹窗 */
+        /** 无限制生成弹窗（永久保留+完全叠加） */
         function createBirthdayPopup() {
-            if (currentPopupCount >= MAX_POPUPS) return;
-
-            // 创建弹窗元素
             const popup = document.createElement("div");
             popup.className = "birthday-popup";
-
-            // 随机赋值祝福语和颜色
             popup.textContent = birthdayWishes[Math.floor(Math.random() * birthdayWishes.length)];
             popup.style.backgroundColor = birthdayColors[Math.floor(Math.random() * birthdayColors.length)];
 
-            // 随机位置（确保在屏幕内）
+            // 固定核心区域叠加（故意重叠密集）
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
-            const popupW = 300;
-            const popupH = 75;
-            const posX = Math.floor(Math.random() * (screenW - popupW));
-            const posY = Math.floor(Math.random() * (screenH - popupH));
+            const popupW = 120; // 极致小巧，叠加更密集
+            const popupH = 35;
+            // 限定在屏幕中间60%区域叠加，形成视觉焦点
+            const posX = Math.floor(Math.random() * (screenW * 0.6) + screenW * 0.2);
+            const posY = Math.floor(Math.random() * (screenH * 0.6) + screenH * 0.2);
             popup.style.left = `${posX}px`;
             popup.style.top = `${posY}px`;
 
-            // 点击弹窗可手动关闭
-            popup.addEventListener("click", () => {
-                popup.classList.remove("show");
-                setTimeout(() => {
-                    popup.remove();
-                    currentPopupCount--;
-                }, 600);
-            });
-
             // 添加到页面并触发动画
             document.body.appendChild(popup);
-            setTimeout(() => popup.classList.add("show"), 80);
-            currentPopupCount++;
-
-            // 5秒后自动关闭
-            setTimeout(() => {
-                popup.classList.remove("show");
-                setTimeout(() => {
-                    popup.remove();
-                    currentPopupCount--;
-                }, 600);
-            }, 5000);
+            setTimeout(() => popup.classList.add("show"), 30);
         }
 
-
-        /** 连续生成弹窗（间隔3.5秒） */
+        /** 300毫秒生成一个（极速叠加，快速铺满） */
         function startBirthdayPopups() {
-            // 立即生成第一个弹窗
             createBirthdayPopup();
-            // 定时生成后续弹窗
-            setInterval(createBirthdayPopup, 1700);
+            setInterval(createBirthdayPopup, 300);
         }
 
-
-        // 页面加载完成后启动弹窗
+        // 页面加载后立即启动
         window.addEventListener("load", startBirthdayPopups);
     </script>
 </body>
